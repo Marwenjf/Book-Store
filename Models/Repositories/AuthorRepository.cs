@@ -9,8 +9,8 @@ namespace Bookstore.Models.Repositories
 
         public AuthorRepository()
         {
-          authors = new List<Author>();
-          /*{
+          authors = new List<Author>()
+          {
               new Author
               {
                   Id=1,FullName="Maro Jaffel"
@@ -23,11 +23,12 @@ namespace Bookstore.Models.Repositories
               {
                   Id=3,FullName="Marwen Jaffel"
               }
-          };*/
+          };
         }
 
         public void Add(Author author)
         {
+            author.Id = authors.Max(a => a.Id)+1;
             authors.Add(author);
         }
 
@@ -48,11 +49,16 @@ namespace Bookstore.Models.Repositories
             return authors;
         }
 
-        public void Update(int id,Author newAuthor)
+        public void Update(Author newAuthor)
         {
-            var author = Find(id);
+            var author = Find(newAuthor.Id);
 
             author.FullName = newAuthor.FullName;
+        }
+
+        public List<Author> Search(string term)
+        {
+            return authors.Where(a=>a.FullName.Contains(term)).ToList();
         }
     }
 }

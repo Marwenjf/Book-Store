@@ -1,18 +1,29 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using Bookstore.Models;
 using Bookstore.Models.Repositories;
+using Bookstore.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace Bookstore.Controllers
 {
     public class BookController:Controller
-    {   private static int bookCount;
+    {    
         private readonly IBookstoreRepository<Book> bookRepository;
-        public BookController(IBookstoreRepository<Book> bookRepository)
+        private readonly IBookstoreRepository<Author> authorRepository;
+        private readonly IHostingEnvironment hosting;
+
+        public BookController(IBookstoreRepository<Book> bookRepository,
+        IBookstoreRepository<Author> authorRepository,
+        IHostingEnvironment hosting)
         {
             this.bookRepository = bookRepository;
+            this.authorRepository = authorRepository;
+            this.hosting = hosting;
         }
         public ActionResult Index()
         {
@@ -26,61 +37,188 @@ namespace Bookstore.Controllers
         }
 
         public ActionResult Create()
-        {
-            return View();
+        {   var model = new BookAuthorViewModel
+            {
+              Authors = FillSelectList()
+            };
+            return View(model);
         }
         
         [HttpPost]
-        public ActionResult Create(Book book)
-        {
+        [ValidateAntiForgeryToken]
+        public ActionResult Create(BookAuthorViewModel model)
+        {   
+            if(ModelState.IsValid)
+            {
             try
-            {   book.Id = ++bookCount;
+            {   
+                string fileName = UploadFile(model.File) ?? string.Empty;
+                
+                if (model.AuthorId == -1)
+                {
+                   ViewBag.Message = "Please select an author from the list!";
+                   return View(GetAllAuthors());
+                }
+                var author = authorRepository.Find(model.AuthorId);
+                Book book = new Book
+                {
+                  
+                  Title = model.Title,
+                  Description = model.Description,
+                  Author = author,
+                  ImageUrl= fileName
+                };
+                
                 bookRepository.Add(book);
                 return RedirectToAction(nameof(Index));
             }
             catch
-            {
-                
+            {    
                 return View();
             }
+            }
+                ModelState.AddModelError("", "You have to fill all the required fields!");
+                return View(GetAllAuthors());
+            
         }
 
-        public ActionResult Edit()
+        public ActionResult Edit(int id)
         {
-            return View();
+            var book = bookRepository.Find(id);
+            var authorId = book.Author == null ? book.Author.Id = 0 : book.Author.Id;
+
+            var viewModel = new BookAuthorViewModel
+            {
+                BookId = book.Id,
+                Title = book.Title,
+                Description = book.Description,
+                AuthorId = authorId,
+                Authors = authorRepository.List().ToList(),
+                ImageUrl = book.ImageUrl
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
-        public ActionResult Edit(int id,IFormCollection collection)
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(BookAuthorViewModel viewModel)
         {
             try
             {
+                System.Console.WriteLine("viewModel.ImageUrl ===== Edit "+viewModel.ImageUrl);
+                // TODO: Add update logic here
+                string fileName = UploadFile(viewModel.File, viewModel.ImageUrl);
+                 
+                var author = authorRepository.Find(viewModel.AuthorId);
+                Book book = new Book
+                {
+                    Id=viewModel.BookId,
+                    Title = viewModel.Title,
+                    Description = viewModel.Description,
+                    Author = author,
+                    ImageUrl = fileName
+                };
+                System.Console.WriteLine("book ===== Edit "+book.ImageUrl);
+                bookRepository.Update(book);
+
                 return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (Exception ex)
             {
-                
                 return View();
             }
         }
 
-        public ActionResult Delete()
+        public ActionResult Delete(int id)
         {
-            return View();
+            var book = bookRepository.Find(id);
+
+            return View(book);
         }
 
         [HttpPost]
-        public ActionResult Delete(int id,IFormCollection collection)
+        public ActionResult ConfirmDelete(int id)
         {
             try
             {
+                bookRepository.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
             catch
-            {
-                
+            {   
                 return View();
             }
+        }
+
+        List<Author> FillSelectList()
+        {
+            var authors = authorRepository.List().ToList();
+            authors.Insert(0, new Author { Id = -1, FullName = "--- Please select an author ---" });
+
+            return authors;
+        }
+
+        BookAuthorViewModel GetAllAuthors()
+        {
+            var vmodel = new BookAuthorViewModel
+            {
+                Authors = FillSelectList()
+            };
+
+            return vmodel;
+        }
+
+        string UploadFile(IFormFile file)
+        {
+            if (file != null)
+            {
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+                string fullPath = Path.Combine(uploads, file.FileName);
+                file.CopyTo(new FileStream(fullPath, FileMode.Create));
+
+                return file.FileName;
+            }
+
+            return null;
+        }
+
+        string UploadFile(IFormFile file, string imageUrl)
+        {   
+            System.Console.WriteLine("UploadFile ===== imageUrl "+imageUrl);
+            System.Console.WriteLine("UploadFile ===== file "+file.FileName);
+            if (file != null)
+            {
+                System.Console.WriteLine("UploadFile ===== file != null ");
+                string uploads = Path.Combine(hosting.WebRootPath, "uploads");
+
+                string newPath = Path.Combine(uploads, file.FileName);
+                System.Console.WriteLine("UploadFile ===== newPath "+newPath);
+                string oldPath = Path.Combine(uploads, imageUrl);
+                System.Console.WriteLine("UploadFile ===== oldPath "+oldPath);
+                if (oldPath != newPath)
+                {
+                    System.Console.WriteLine("UploadFile ===== oldPath != newPath");
+                    System.Console.WriteLine(oldPath);
+                    System.GC.Collect(); 
+                    System.GC.WaitForPendingFinalizers(); 
+                    System.IO.File.Delete(oldPath);
+                    System.Console.WriteLine("UploadFile ===== after delete ");
+                    file.CopyTo(new FileStream(newPath, FileMode.Create));
+                    System.Console.WriteLine("UploadFile ===== after copy ");
+                }
+                System.Console.WriteLine("UploadFile ===== end if "+file.FileName);
+                return file.FileName;
+            }
+            System.Console.WriteLine("UploadFile ===== end if "+imageUrl); 
+            return imageUrl;
+        }
+
+        public ActionResult Search(string term)
+        {
+            var result = bookRepository.Search(term);
+
+            return View("Index", result);
         }
 
 

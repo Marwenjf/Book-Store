@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\marwen\\dotnet\\Bookstore\\Bookstore.csproj": {}
+    "C:\\Users\\marouane\\Desktop\\TestApp\\dotnet-projects\\Bookstore\\Bookstore.csproj": {}
   },
   "projects": {
-    "D:\\marwen\\dotnet\\Bookstore\\Bookstore.csproj": {
+    "C:\\Users\\marouane\\Desktop\\TestApp\\dotnet-projects\\Bookstore\\Bookstore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\marwen\\dotnet\\Bookstore\\Bookstore.csproj",
+        "projectUniqueName": "C:\\Users\\marouane\\Desktop\\TestApp\\dotnet-projects\\Bookstore\\Bookstore.csproj",
         "projectName": "Bookstore",
-        "projectPath": "D:\\marwen\\dotnet\\Bookstore\\Bookstore.csproj",
-        "packagesPath": "C:\\Users\\Marwen\\.nuget\\packages\\",
-        "outputPath": "D:\\marwen\\dotnet\\Bookstore\\obj\\",
+        "projectPath": "C:\\Users\\marouane\\Desktop\\TestApp\\dotnet-projects\\Bookstore\\Bookstore.csproj",
+        "packagesPath": "C:\\Users\\marouane\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\marouane\\Desktop\\TestApp\\dotnet-projects\\Bookstore\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Marwen\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\marouane\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.0"
@@ -35,6 +35,20 @@
       },
       "frameworks": {
         "netcoreapp3.0": {
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[3.0.1, )"
+            },
+            "Microsoft.EntityFrameworkCore.InMemory": {
+              "target": "Package",
+              "version": "[3.0.1, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[3.0.1, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -45,6 +59,24 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[3.0.1, 3.0.1]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[3.0.3, 3.0.3]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[3.0.0, 3.0.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -53,7 +85,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.103\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.417\\RuntimeIdentifierGraph.json"
         }
       }
     }

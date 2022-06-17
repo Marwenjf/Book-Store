@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bookstore.Controllers
 {
     public class AuthorController:Controller
-    {   private static int authorCount;
+    {    
         private readonly IBookstoreRepository<Author> authorRepository;
+
         public AuthorController(IBookstoreRepository<Author> authorRepository)
         {
             this.authorRepository = authorRepository;
@@ -34,7 +35,7 @@ namespace Bookstore.Controllers
         public ActionResult Create(Author author)
         {
             try
-            {   author.Id = ++authorCount;
+            {   
                 authorRepository.Add(author);
                 return RedirectToAction(nameof(Index));
             }
@@ -45,16 +46,18 @@ namespace Bookstore.Controllers
             }
         }
 
-        public ActionResult Edit()
+        public ActionResult Edit(int id)
         {
-            return View();
+            var author = authorRepository.Find(id);
+            return View(author);
         }
 
         [HttpPost]
-        public ActionResult Edit(int id,IFormCollection collection)
+        public ActionResult Edit(Author author)
         {
             try
             {
+                authorRepository.Update(author);
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -64,16 +67,17 @@ namespace Bookstore.Controllers
             }
         }
 
-        public ActionResult Delete()
+        public ActionResult Delete(int id)
         {
-            return View();
+            var author = authorRepository.Find(id);
+            return View(author);
         }
 
         [HttpPost]
-        public ActionResult Delete(int id,IFormCollection collection)
+        public ActionResult ConfirmDelete(int id)
         {
             try
-            {
+            {    authorRepository.Delete(id);
                 return RedirectToAction(nameof(Index));
             }
             catch
