@@ -185,32 +185,21 @@ namespace Bookstore.Controllers
 
         string UploadFile(IFormFile file, string imageUrl)
         {   
-            System.Console.WriteLine("UploadFile ===== imageUrl "+imageUrl);
-            System.Console.WriteLine("UploadFile ===== file "+file.FileName);
             if (file != null)
             {
-                System.Console.WriteLine("UploadFile ===== file != null ");
                 string uploads = Path.Combine(hosting.WebRootPath, "uploads");
 
                 string newPath = Path.Combine(uploads, file.FileName);
-                System.Console.WriteLine("UploadFile ===== newPath "+newPath);
                 string oldPath = Path.Combine(uploads, imageUrl);
-                System.Console.WriteLine("UploadFile ===== oldPath "+oldPath);
                 if (oldPath != newPath)
                 {
-                    System.Console.WriteLine("UploadFile ===== oldPath != newPath");
-                    System.Console.WriteLine(oldPath);
                     System.GC.Collect(); 
                     System.GC.WaitForPendingFinalizers(); 
                     System.IO.File.Delete(oldPath);
-                    System.Console.WriteLine("UploadFile ===== after delete ");
                     file.CopyTo(new FileStream(newPath, FileMode.Create));
-                    System.Console.WriteLine("UploadFile ===== after copy ");
                 }
-                System.Console.WriteLine("UploadFile ===== end if "+file.FileName);
                 return file.FileName;
-            }
-            System.Console.WriteLine("UploadFile ===== end if "+imageUrl); 
+            } 
             return imageUrl;
         }
 
